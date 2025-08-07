@@ -24,8 +24,8 @@ virtual_gateway -->|SNAT 172.24.0.100| c2[Client 2]
     subgraph virtual_gateway[Virtual Gateway]
         nat1[nat1 Primary]
         nat2[nat2 Backup]
-        nat1 -->|conntrackd sync| nat2
-        nat1 -->|Keepalived| nat2
+        nat1 <-->|conntrackd sync| nat2
+        nat1 <-->|Keepalived| nat2
     end
     subgraph net1[Network 1 172.23.0.0/16]
         c1
@@ -89,10 +89,8 @@ This test demonstrates that `client1` can connect to `client2` via the NAT gatew
 
 1. **Prepare SSH Access on `client2`:**
     ```sh
-    docker exec -it $(docker ps -q -f name=client2) /bin/bash
+    docker exec -it $(docker ps -q -f name=client2) passwd test
     # The 'test' user is created in Dockerfile.client
-    passwd test
-    exit
     ```
 
 2. **Configure Routing:**
@@ -107,12 +105,15 @@ This test demonstrates that `client1` can connect to `client2` via the NAT gatew
 3. **Monitor SSH Traffic on `nat2`:**
     ```sh
     # Run in a separate terminal to observe failover
-    docker exec -it $(docker ps -q -f name=nat2) tcpdump -i eth1 dst port 22 -n
+    docker exec -it $(docker ps -q -f name=nat2) tcpdump -i any host 172.24.0.20 and port 22
     ```
 
 4. **Establish SSH Connection:**
     ```sh
     docker exec -it $(docker ps -q -f name=client1) ssh test@172.24.0.20
+    # keep printing the date to keep the session alive and track failover
+    # This will show that the session remains active even if nat1 goes down
+    /bin/bash -c 'while true; do clear && echo $SSH_CONNECTION && for i in {1..10}; do date && sleep 1; done; done'
     ```
 
 5. **Simulate Failover:**
@@ -124,9 +125,7 @@ This test demonstrates that `client1` can connect to `client2` via the NAT gatew
 
 6. **Restore Primary NAT Gateway:**
     ```sh
-    docker start $(docker ps -q -f name=nat1)
-    # Remove lock file to allow nat1 to reclaim the VIP
-    docker exec -it $(docker ps -q -f name=nat1) rm /var/run/conntrackd.lock
+    docker start $(docker ps -a -q -f name=nat1)
     # SSH traffic should switch back to nat1; session remains active
     ```
 
