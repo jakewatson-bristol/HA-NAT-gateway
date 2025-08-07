@@ -16,14 +16,23 @@ This project demonstrates how to set up redundant NAT gateways using [conntrackd
 - **client1**: Host on `net1` (172.23.0.20)
 - **client2**: Host on `net2` (172.24.0.20)
 
+### Network Diagram
 ```mermaid
-graph TD
-    c1[Client 1] -->|172.23.0.100| GVIP[Virtual gateway]
-    GVIP -->|Primary| nat1[NAT Gateway 1]
-    GVIP -->|Backup| nat2[NAT Gateway 2]
-    GVIP --> |SNAT 172.24.0.100| client2[Client 2]
-    nat1 <-->|conntrackd sync| nat2
-    nat1 <-->|Keepalived| nat2
+flowchart TD
+c1[Client 1] -->|172.23.0.100| virtual_gateway
+virtual_gateway -->|SNAT 172.24.0.100| c2[Client 2]
+    subgraph virtual_gateway[Virtual Gateway]
+        nat1[nat1 Primary]
+        nat2[nat2 Backup]
+        nat1 -->|conntrackd sync| nat2
+        nat1 -->|Keepalived| nat2
+    end
+    subgraph net1[Network 1 172.23.0.0/16]
+        c1
+    end
+    subgraph net2[Network 2 172.24.0.0/16]
+        c2
+    end
 ```
 
 ## Features
