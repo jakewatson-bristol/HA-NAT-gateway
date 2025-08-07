@@ -49,6 +49,9 @@ graph TD
 
 2. **Start the environment**:
     ```sh
+    # create the 2 docker networks
+    docker network create --subnet=172.23.0.0/16 net1
+    docker network create --subnet=172.24.0.0/16 net2
     vagrant up --parallel
     ```
 
