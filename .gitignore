@@ -1,0 +1,38 @@
+# Vagrant
+.vagrant/
+*.log
+
+# Docker
+**/node_modules/
+**/.env
+**/.env.*
+**/docker-compose.override.yml
+**/docker-compose.local.yml
+**/docker-compose.dev.yml
+**/docker-compose.prod.yml
+**/docker-compose.test.yml
+**/Dockerfile.*.bak
+**/Dockerfile.*.tmp
+**/Dockerfile.*.old
+
+# Devcontainer
+.devcontainer/*.bak
+.devcontainer/*.tmp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Misc
+*.swp
+*.swo
+*.bak
+*.tmp
+*.old
+.
