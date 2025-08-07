@@ -18,7 +18,7 @@ This project demonstrates how to set up redundant NAT gateways using [conntrackd
 
 ### Network Diagram
 ```mermaid
-flowchart TD
+flowchart LR
 c1[Client 1] -->|172.23.0.100| virtual_gateway
 virtual_gateway -->|SNAT 172.24.0.100| c2[Client 2]
     subgraph virtual_gateway[Virtual Gateway]
