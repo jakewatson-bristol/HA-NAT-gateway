@@ -15,6 +15,9 @@ COPY conntrackd.nat2.conf /etc/conntrackd/conntrackd.nat2.conf
 
 COPY gateway.sh /usr/local/bin/gateway.sh
 RUN chmod +x /usr/local/bin/gateway.sh
+RUN chmod +x /etc/keepalived/notify-primary.sh
+RUN chmod +x /etc/keepalived/notify-backup.sh
+RUN chmod +x /etc/keepalived/notify-fault.sh
 
 RUN useradd test
 
