@@ -1,0 +1,72 @@
+version: "3.8"
+
+services:
+  nat1:
+    build:
+      context: ./natgateway
+      dockerfile: Dockerfile
+    container_name: nat1
+    hostname: nat1
+    privileged: true
+    networks:
+      net1:
+        ipv4_address: 172.23.0.10
+      net2:
+        ipv4_address: 172.24.0.10
+    cap_add:
+      - NET_ADMIN
+    command: ["/usr/local/bin/gateway.sh"]
+
+  nat2:
+    build:
+      context: ./natgateway
+      dockerfile: Dockerfile
+    container_name: nat2
+    hostname: nat2
+    privileged: true
+    networks:
+      net1:
+        ipv4_address: 172.23.0.11
+      net2:
+        ipv4_address: 172.24.0.11
+    cap_add:
+      - NET_ADMIN
+    command: ["/usr/local/bin/gateway.sh"]
+
+  client1:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: client1
+    hostname: client1
+    networks:
+      net1:
+        ipv4_address: 172.23.0.20
+    cap_add:
+      - NET_ADMIN
+    command: ["/usr/sbin/sshd", "-D"]
+
+  client2:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: client2
+    hostname: client2
+    networks:
+      net2:
+        ipv4_address: 172.24.0.20
+    cap_add:
+      - NET_ADMIN
+    command: ["/usr/sbin/sshd", "-D"]
+
+networks:
+  net1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.23.0.0/16
+  net2:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.24.0.0/16
