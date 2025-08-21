@@ -12,9 +12,12 @@ while true; do
     # Detect which nat gateway instance this is
     if [ "$HOSTNAME" == "nat1" ]; then
         NET2_ETH=$(ip -o -4 addr show | awk '/172\.24\.0\.10/ {print $2}')
+        NET1_ETH=$(ip -o -4 addr show | awk '/172\.23\.0\.10/ {print $2}')
     else
         NET2_ETH=$(ip -o -4 addr show | awk '/172\.24\.0\.11/ {print $2}')
+        NET1_ETH=$(ip -o -4 addr show | awk '/172\.23\.0\.11/ {print $2}')
     fi
+    echo "NET1_ETH=$NET1_ETH NET2_ETH=$NET2_ETH" >&2
     TRY_COUNT=0
     while ! pgrep conntrackd >/dev/null; do
         echo "conntrackd is not running, trying to start it..."
@@ -38,7 +41,10 @@ while true; do
         echo "keepalived is not running, trying to start it..."
         sleep 1
         if ! pgrep keepalived >/dev/null; then
-            keepalived -D -f /etc/keepalived/keepalived.$HOSTNAME.conf
+            # Substitute the interface in the configuration file
+            sed "s/__NET1_ETH__/$NET1_ETH/g" /etc/keepalived/keepalived.$HOSTNAME.conf > /etc/keepalived/keepalived.conf
+            sed -i "s/__NET2_ETH__/$NET2_ETH/g" /etc/keepalived/keepalived.conf
+            keepalived -n -l -f /etc/keepalived/keepalived.conf
             TRY_COUNT=$((TRY_COUNT + 1))
             echo "Attempt $TRY_COUNT to start keepalived"
             if [ $TRY_COUNT -ge 5 ]; then
