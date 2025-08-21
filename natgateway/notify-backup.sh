@@ -1,6 +1,9 @@
 #!/bin/bash
 # /etc/keepalived/backup.sh
 
+echo "keepalived: transitioned to BACKUP - sending state to other nodes..." >> /var/log/keepalived.log
+/usr/sbin/conntrackd -B >> /var/log/keepalived.log 2>&1
+
 echo "keepalived: Transitioned to BACKUP - flushing conntrack table..." >> /var/log/keepalived.log
 # Flush kernel conntrack table to avoid conflicts
 /usr/sbin/conntrackd -f >> /var/log/keepalived.log 2>&1
