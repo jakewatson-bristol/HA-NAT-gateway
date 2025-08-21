@@ -1,13 +1,12 @@
 # Conntrackd NAT Gateway Example
 
-This project demonstrates how to set up redundant NAT gateways using [conntrackd](https://manpages.debian.org/testing/conntrackd/conntrackd.8.en.html) and [keepalived](https://keepalived.org/) for stateful failover of network connections. It uses Vagrant and Docker to create a test environment with two NAT gateways and two client machines on separate networks.
+This project demonstrates how to set up redundant NAT gateways using [conntrackd](https://manpages.debian.org/testing/conntrackd/conntrackd.8.en.html) and [keepalived](https://keepalived.org/) for stateful failover of network connections. It uses Docker Compose to create a test environment with two NAT gateways and two client machines on separate networks.
 
 ## Project Structure
 
 - **natgateway/**: Contains configuration files and scripts for NAT gateway containers.
 - **Dockerfile.client**: Dockerfile for client containers.
-- **Vagrantfile**: Defines the topology and provisioning for the test environment.
-- **.vagrant/**: Vagrant state directory.
+- **docker-compose.yml**: Defines the topology, networks, and provisioning for the test environment.
 
 ## Topology
 
@@ -45,8 +44,8 @@ virtual_gateway -->|SNAT 172.24.0.100| c2[Client 2]
 
 ### Prerequisites
 
-- [Vagrant](https://www.vagrantup.com/) (with Docker provider)
 - [Docker](https://www.docker.com/)
+- [Docker Compose](https://docs.docker.com/compose/)
 
 ### Start the Example
 
@@ -58,24 +57,20 @@ virtual_gateway -->|SNAT 172.24.0.100| c2[Client 2]
 
 2. **Start the environment**:
     ```sh
-    # create the 2 docker networks
-    docker network create --subnet=172.23.0.0/16 net1
-    docker network create --subnet=172.24.0.0/16 net2
-    vagrant up --parallel
+    docker compose up --build -d
     ```
 
 3. **Check status**:
     ```sh
-    vagrant status
-    vagrant docker-logs
+    docker compose ps
     ```
 
 4. **Access containers**:
     ```sh
-    docker exec -it $(docker ps -q -f name=nat1) /bin/bash
-    docker exec -it $(docker ps -q -f name=nat2) /bin/bash
-    docker exec -it $(docker ps -q -f name=client1) /bin/bash
-    docker exec -it $(docker ps -q -f name=client2) /bin/bash
+    docker exec -it nat1 /bin/bash
+    docker exec -it nat2 /bin/bash
+    docker exec -it client1 /bin/bash
+    docker exec -it client2 /bin/bash
     ```
 
 ### Testing Failover
@@ -139,5 +134,5 @@ This test demonstrates that `client1` can connect to `client2` via the NAT gatew
 ### Cleanup
 
 ```sh
-vagrant destroy --parallel
+docker compose down -v
 ```
